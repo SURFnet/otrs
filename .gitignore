@@ -345,3 +345,6 @@ OTRSSTORM.sopm
 .ssh
 .viminfo
 .bash*
+
+# SURFCert
+test

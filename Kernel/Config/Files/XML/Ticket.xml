@@ -11694,6 +11694,15 @@ Thanks for your help!
             </Hash>
         </Value>
     </Setting>
+    <Setting Name="PostMaster::CheckFollowUpModule###0700-IP" Required="0" Valid="1">
+        <Description Translatable="1">Executes follow-up checks on dynamic field IP.</Description>
+        <Navigation>Core::Email::PostMaster</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Module">Kernel::System::PostMaster::FollowUpCheck::IP</Item>
+            </Hash>
+        </Value>
+    </Setting>
     <Setting Name="PostMaster::NewTicket::AutoAssignCustomerIDForUnknownCustomers" Required="1" Valid="1">
         <Description Translatable="1">Controls if CustomerID is automatically copied from the sender address for unknown customers.</Description>
         <Navigation>Core::Email::PostMaster</Navigation>
@@ -12230,6 +12239,17 @@ Thanks for your help!
                 <Item Key="Module">Kernel::System::DynamicField::Driver::Multiselect</Item>
                 <Item Key="ConfigDialog">AdminDynamicFieldMultiselect</Item>
                 <Item Key="ItemSeparator">, </Item>
+            </Hash>
+        </Value>
+    </Setting>
+    <Setting Name="DynamicFields::Driver###Inet" Required="0" Valid="1">
+        <Description Translatable="1">DynamicField backend registration.</Description>
+        <Navigation>Core::DynamicFields::DriverRegistration</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="DisplayName" Translatable="1">Inet</Item>
+                <Item Key="Module">Kernel::System::DynamicField::Driver::Inet</Item>
+                <Item Key="ConfigDialog">AdminDynamicFieldInet</Item>
             </Hash>
         </Value>
     </Setting>

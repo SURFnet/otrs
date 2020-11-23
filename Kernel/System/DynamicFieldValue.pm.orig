@@ -114,7 +114,6 @@ sub ValueSet {
             )
             && !defined $Param{Value}->[$Counter]->{ValueInt}
             && !defined $Param{Value}->[$Counter]->{ValueDateTime}
-            && !defined $Param{Value}->[$Counter]->{ValueInet}
             )
         {
             last VALUE;
@@ -124,7 +123,6 @@ sub ValueSet {
             ValueText     => scalar $Param{Value}->[$Counter]->{ValueText},
             ValueInt      => scalar $Param{Value}->[$Counter]->{ValueInt},
             ValueDateTime => scalar $Param{Value}->[$Counter]->{ValueDateTime},
-            ValueInet     => scalar $Param{Value}->[$Counter]->{ValueInet},
         );
 
         # data validation
@@ -161,11 +159,11 @@ sub ValueSet {
         # create a new value entry
         return if !$DBObject->Do(
             SQL =>
-                'INSERT INTO dynamic_field_value (field_id, object_id, value_text, value_date, value_int, value_inet)'
-                . ' VALUES (?, ?, ?, ?, ?, ?)',
+                'INSERT INTO dynamic_field_value (field_id, object_id, value_text, value_date, value_int)'
+                . ' VALUES (?, ?, ?, ?, ?)',
             Bind => [
                 \$Param{FieldID}, \$Param{ObjectID},
-                \$Value->{ValueText}, \$Value->{ValueDateTime}, \$Value->{ValueInt}, \$Value->{ValueInet}
+                \$Value->{ValueText}, \$Value->{ValueDateTime}, \$Value->{ValueInt},
             ],
         );
     }
@@ -244,7 +242,7 @@ sub ValueGet {
     # cache expiration); return only specified one dynamic field
     return if !$DBObject->Prepare(
         SQL =>
-            'SELECT id, value_text, value_date, value_int, value_inet, field_id
+            'SELECT id, value_text, value_date, value_int, field_id
             FROM dynamic_field_value
             WHERE object_id = ?
             ORDER BY id',
@@ -264,12 +262,11 @@ sub ValueGet {
             $Data[2] =~ s/^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\..+?$/$1/;
         }
 
-        push @{ $CacheData{ $Data[5] } }, {
+        push @{ $CacheData{ $Data[4] } }, {
             ID            => $Data[0],
             ValueText     => $Data[1],
             ValueDateTime => $Data[2],
             ValueInt      => $Data[3],
-            ValueInet     => $Data[4],
         };
     }
 
@@ -525,9 +522,6 @@ sub HistoricalValueGet {
     elsif ( $Param{ValueType} && $Param{ValueType} eq 'Integer' ) {
         $ValueType = 'value_int';
     }
-    elsif ( $Param{ValueType} && $Param{ValueType} eq 'Inet' ) {
-        $ValueType = 'value_inet';
-    }
 
     # get cache object
     my $CacheObject = $Kernel::OM->Get('Kernel::System::Cache');
@@ -665,17 +659,12 @@ sub ValueSearch {
     my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 
     my $SQL = '
-        SELECT id, field_id, object_id, value_text, value_date, value_int, value_inet
+        SELECT id, field_id, object_id, value_text, value_date, value_int
         FROM  dynamic_field_value
         WHERE  dynamic_field_value.field_id = ?
             AND ';
 
     $SQL .= $Param{SearchSQL};
-
-    $Kernel::OM->Get('Kernel::System::Log')->Log(
-        Priority => 'debug',
-        Message  => "SQL: $SQL"
-    );
 
     return if !$DBObject->Prepare(
         SQL  => $SQL,
@@ -688,13 +677,12 @@ sub ValueSearch {
 
     while ( my @Data = $DBObject->FetchrowArray() ) {
         push @Values, {
-            ID         => $Data[0],
-            FieldID    => $Data[1],
-            ObjectID   => $Data[2],
-            ValueText  => $Data[3],
-            ValueDate  => $Data[4],
-            ValueInt   => $Data[5],
-            ValueInet  => $Data[6],
+            ID        => $Data[0],
+            FieldID   => $Data[1],
+            ObjectID  => $Data[2],
+            ValueText => $Data[3],
+            ValueDate => $Data[4],
+            ValueInt  => $Data[5],
         };
     }
 
@@ -785,10 +773,6 @@ sub _DeleteFromCache {
         );
     }
 
-    $CacheObject->Delete(
-        Type => 'DynamicFieldValue',
-        Key  => 'HistoricalValueGet::FieldID::' . $Param{FieldID} . '::ValueType::Inet',
-    );
     $CacheObject->Delete(
         Type => 'DynamicFieldValue',
         Key  => 'ValueSearch::' . $Param{FieldID},
